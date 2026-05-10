@@ -87,7 +87,8 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel(), innerPadding: PaddingVa
     }
 
     Column(modifier = Modifier.fillMaxSize()
-        .padding(innerPadding)) {
+        .padding(innerPadding)
+        .padding(horizontal = 16.dp)) {
 
         SearchBar(
             hint = "Search Source",
