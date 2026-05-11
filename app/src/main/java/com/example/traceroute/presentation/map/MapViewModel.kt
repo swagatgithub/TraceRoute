@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.example.traceroute.utils.interpolate
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 
 @HiltViewModel
@@ -18,6 +19,8 @@ class MapViewModel @Inject constructor(private val repository: MapsRepository) :
 
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState = _uiState.asStateFlow()
+
+    private var animationJob: Job? = null
 
     fun updateSource(source: LatLng) {
         _uiState.update {
@@ -61,34 +64,45 @@ class MapViewModel @Inject constructor(private val repository: MapsRepository) :
         }
     }
 
-    private suspend fun animateMarker(route: List<LatLng>) {
+    private fun animateMarker(route: List<LatLng>) {
 
-        if (route.size < 2) return
+        animationJob?.cancel()
 
-        for (index in 0 until route.lastIndex) {
+        animationJob =
+            viewModelScope.launch {
 
-            val start =
-                route[index]
+                if (route.size < 2) return@launch
 
-            val end =
-                route[index + 1]
+                for (index in 0 until route.lastIndex) {
 
-            val steps = 60
+                    val start =
+                        route[index]
 
-            for (step in 0..steps) {
+                    val end =
+                        route[index + 1]
 
-                val fraction =
-                    step / steps.toFloat()
+                    val steps = 60
 
-                val position = interpolate(fraction, start, end)
+                    for (step in 0..steps) {
 
-                updateMovingMarker(
-                    position
-                )
+                        val fraction =
+                            step / steps.toFloat()
 
-                delay(16L)
+                        val position =
+                            interpolate(
+                                fraction,
+                                start,
+                                end
+                            )
+
+                        updateMovingMarker(
+                            position
+                        )
+
+                        delay(16L)
+                    }
+                }
             }
-        }
     }
 
     fun updateMovingMarker(latLng: LatLng) {
