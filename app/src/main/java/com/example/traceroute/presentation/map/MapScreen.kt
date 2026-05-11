@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -118,40 +119,42 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel(), innerPadding: PaddingVa
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        LazyColumn(modifier = Modifier.height(200.dp)) {
+        if(predictions.isNotEmpty()) {
+            LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
 
-            items(predictions) { prediction ->
+                items(predictions) { prediction ->
 
-                Text(text = prediction.getFullText(null).toString(),
-                    modifier = Modifier.fillMaxWidth().clickable {
+                    Text(text = prediction.getFullText(null).toString(),
+                        modifier = Modifier.fillMaxWidth().clickable {
 
-                                val placeFields = listOf(Place.Field.LAT_LNG)
+                            val placeFields = listOf(Place.Field.LAT_LNG)
 
-                                val request = FetchPlaceRequest.builder(prediction.placeId, placeFields).build()
+                            val request = FetchPlaceRequest.builder(prediction.placeId, placeFields).build()
 
-                                placesClient
-                                    .fetchPlace(request)
-                                    .addOnSuccessListener {
-                                        it.place.latLng
-                                            ?.let { latLng ->
-                                                if (activeSearchType == "source") {
-                                                    sourceQuery =
-                                                        prediction
-                                                            .getFullText(null)
-                                                            .toString()
-                                                    viewModel.updateSource(latLng)
-                                                } else {
-                                                    destinationQuery =
-                                                        prediction
-                                                            .getFullText(null)
-                                                            .toString()
-                                                    viewModel.updateDestination(latLng)
-                                                }
-                                                predictions = emptyList()
+                            placesClient
+                                .fetchPlace(request)
+                                .addOnSuccessListener {
+                                    it.place.latLng
+                                        ?.let { latLng ->
+                                            if (activeSearchType == "source") {
+                                                sourceQuery =
+                                                    prediction
+                                                        .getFullText(null)
+                                                        .toString()
+                                                viewModel.updateSource(latLng)
+                                            } else {
+                                                destinationQuery =
+                                                    prediction
+                                                        .getFullText(null)
+                                                        .toString()
+                                                viewModel.updateDestination(latLng)
                                             }
-                                    }
-                            }.padding(16.dp)
-                )
+                                            predictions = emptyList()
+                                        }
+                                }
+                        }.padding(16.dp)
+                    )
+                }
             }
         }
 

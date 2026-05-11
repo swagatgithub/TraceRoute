@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.ksp)
 
     alias(libs.plugins.hilt)
+
+    alias(libs.plugins.google.secrets)
 }
 
 android {
@@ -29,15 +31,6 @@ android {
 
         testInstrumentationRunner =
             "androidx.test.runner.AndroidJUnitRunner"
-
-       /* manifestPlaceholders["MAPS_API_KEY"] =
-            project.properties["MAPS_API_KEY"] as String*/
-
-        buildConfigField(
-            "String",
-            "MAPS_API_KEY",
-            "\"${project.properties["MAPS_API_KEY"]}\""
-        )
     }
 
     buildTypes {
